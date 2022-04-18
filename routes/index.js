@@ -1,11 +1,22 @@
 const express = require('express')
 const router = express.Router()
+const Bug = require('../models/bug')
 
-// Route: This is the very root of our application
-// Here we are passing to the route a function consisting of the request and response objects.
+// Index Route: This is the root of the application
 router.get('/', (req, res) => {
-    //Render our index view
     res.render('index')
+})
+
+// New Bug Route
+router.get('/new', (req, res) => {
+    res.render('index/new', { bug: new Bug() })
+})
+
+// Create Bug Route
+router.post('/', (req, res) => {
+    //res.send('Create New Bug Report')
+    //res.render('index')
+    res.send(req.body.name)
 })
 
 module.exports = router
