@@ -1,0 +1,14 @@
+<table id="bugTable" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% bugs.forEach(bug => { %>
+        <tr>
+            <td><%= bug.name %></td>
+        </tr>
+        <% }); %>
+    </tbody>
+</table>
