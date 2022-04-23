@@ -10,12 +10,10 @@ router.get('/', async (req, res) => {
     } catch {
         res.redirect('/')
     }
-    //res.render('index/bugTable')
 })
 
 //new bug route
 router.get('/new', (req, res) => {
-    //res.send('new bug page')
     res.render('index/new', { bug: new Bug() })
 })
 
@@ -34,5 +32,62 @@ router.post('/', async (req, res) => {
         })
     }
 })
+
+// Show bug route
+router.get('/:id', async (req, res) => {
+    try {
+        const bug = await Bug.findById(req.params.id)
+        res.render('index/details', { bug: bug })
+    } catch {
+        res.redirect('/')
+    }
+})
+
+//Edit Bug Route
+router.get('/:id/edit', async (req, res) => {
+    try {
+        const bug = await Bug.findById(req.params.id)
+        res.render('index/edit', { bug: bug })
+    } catch {
+        res.redirect('/')
+    }
+})
+
+//Update Bug Route
+router.put('/:id', async (req, res) => {
+    let bug
+    try {
+        bug = await Bug.findById(req.params.id)
+        bug.name = req.body.name
+        await bug.save()
+        res.redirect(`/${bug.id}`)
+    } catch {
+        if (bug == null) {
+            res.redirect('/')
+        } else {
+            res.render('index/edit', {
+                bug: bug,
+                errorMessage: 'Error updating bug'
+            })
+        }
+    }
+})
+
+//Delete bug route
+router.delete('/:id', async (req, res) => {
+    let bug
+    try {
+        bug = await Bug.findById(req.params.id)
+        await bug.remove()
+        res.redirect('/')
+    } catch {
+        if (bug == null) {
+            res.redirect('/')
+        } else {
+            res.redirect(`/${bug.id}`)
+        }
+    }
+})
+
 
 module.exports = router

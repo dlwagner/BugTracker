@@ -1,0 +1,9 @@
+<h2>Edit Bug</h2>
+<%= //bug.id + ' ' + bug.name %>
+<!--<a href="/<%= //bug.id %>"><%= //bug.name %></a>-->
+<div><%= //bug.name %></div>
+<form action="/<%= bug.id %>?_method=PUT" method="POST">
+    <%- include('_form_fields') %>
+    <a href="/<%= bug.id %>">Cancel</a>
+    <button type="submit">Update</button>
+  </form>

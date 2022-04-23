@@ -7,7 +7,7 @@
     <tbody>
         <% bugs.forEach(bug => { %>
         <tr>
-            <td><%= bug.name %></td>
+            <td><a href="/<%= bug.id %>"><%= bug.name %></a></td>
         </tr>
         <% }); %>
     </tbody>
