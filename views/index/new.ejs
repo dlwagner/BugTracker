@@ -4,6 +4,28 @@
     <input type="text" name="title" value="<%= bug.title %>">
     <label>Description</label>
     <textarea name="description"><%= bug.description %></textarea>
+    <label>Category</label>
+    <select name="category">
+        <option value="">--Please choose a category--</option>
+        <option value="Bug" <%=bug.category==='Bug' ? 'selected' : '' %>>Bug</option>
+        <option value="Feature" <%=bug.category==='Feature' ? 'selected' : '' %>>Feature</option>
+        <option value="Maintenance" <%=bug.category==='Maintenance' ? 'selected' : '' %>>Maintenance</option>
+    </select>
+    <label>Status</label>
+    <select name="status">
+        <option value="">--Please choose a Status--</option>
+        <option value="New" <%=bug.status==='New' ? 'selected' : '' %>>New</option>
+        <option value="Assigned" <%=bug.status==='Assigned' ? 'selected' : '' %>>Assigned</option>
+        <option value="In-progress" <%=bug.status==='In-progress' ? 'selected' : '' %>>In-progress</option>
+        <option value="Closed" <%=bug.status==='Closed' ? 'selected' : '' %>>Closed</option>
+    </select>
+    <label>Priority</label>
+    <select name="priority">
+        <option value="">--Please choose a Priority--</option>
+        <option value="Low" <%=bug.priority==='Low' ? 'selected' : '' %>>Low</option>
+        <option value="Medium" <%=bug.priority==='Medium' ? 'selected' : '' %>>Medium</option>
+        <option value="High" <%=bug.priority==='High' ? 'selected' : '' %>>High</option>
+    </select>
     <a href="/">Cancel</a>
     <button type="submit">Create</button>
 </form>

@@ -9,8 +9,42 @@ const bugSchema = new mongoose.Schema({
     description: {
         type: String,
         required: true
-    }
+    },
 
+    category: {
+        type: String,
+        required: false
+    },
+
+    status: {
+        type: String,
+        required: false
+    },
+
+    priority: {
+        type: String,
+        required: false
+    },
+
+    createdBy: {
+        type: String,
+        required: false
+    },
+
+    assignedTo: {
+        type: String,
+        required: false
+    },
+
+    project: {
+        type: String,
+        required: false
+    },
+
+    milestone: {
+        type: String,
+        required: false
+    }
 })
 
 module.exports = mongoose.model('Bug', bugSchema)

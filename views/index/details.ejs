@@ -1,5 +1,9 @@
-<h2><%= bug.title %></h2>
-<p><%= bug.description %></p>
+<h2>Bug Details</h2>
+<p>Title: <%= bug.title %></p>
+<p>Description: <%= bug.description %></p>
+<p>Category: <%= bug.category %></p>
+<p>Status: <%= bug.status %></p>
+<p>Priority: <%= bug.priority %></p>
 <a href="/<%= bug.id %>/edit">Edit</a>
 <form method="POST" action="/<%= bug.id %>?_method=DELETE">
     <button type="submit">Delete</button>

@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
     try {
         const bugs = await Bug.find({})
         res.render('index/bugTable', { bugs: bugs })
-        console.log(bugs)
+        //console.log(bugs)
     } catch {
         res.redirect('/')
     }
@@ -22,12 +22,15 @@ router.get('/new', (req, res) => {
 router.post('/', async (req, res) => {
     const bug = new Bug({
         title: req.body.title,
-        description: req.body.description
+        description: req.body.description,
+        category: req.body.category,
+        status: req.body.status,
+        priority: req.body.priority
     })
     try {
         const newBug = await bug.save()
         res.redirect('/')
-        //console.log("bug:", bug)
+        // console.log("save bug:", bug)
     } catch {
         res.render('index/new', {
             bug: bug,
@@ -65,6 +68,9 @@ router.put('/:id', async (req, res) => {
         bug = await Bug.findById(req.params.id)
         bug.title = req.body.title
         bug.description = req.body.description
+        bug.category = req.body.category
+        bug.status = req.body.status
+        bug.priority = req.body.priority
         await bug.save()
         // console.log(req.body.title)
         res.redirect(`/${bug.id}`)
