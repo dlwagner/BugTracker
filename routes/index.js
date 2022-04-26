@@ -2,29 +2,32 @@ const express = require('express')
 const router = express.Router()
 const Bug = require('../models/bug')
 
-//all bugs route
+//All bugs route
 router.get('/', async (req, res) => {
     try {
         const bugs = await Bug.find({})
         res.render('index/bugTable', { bugs: bugs })
+        console.log(bugs)
     } catch {
         res.redirect('/')
     }
 })
 
-//new bug route
+//New bug route
 router.get('/new', (req, res) => {
     res.render('index/new', { bug: new Bug() })
 })
 
-//create new bug route
+//Create new bug route
 router.post('/', async (req, res) => {
     const bug = new Bug({
-        name: req.body.name
+        title: req.body.title,
+        description: req.body.description
     })
     try {
         const newBug = await bug.save()
         res.redirect('/')
+        //console.log("bug:", bug)
     } catch {
         res.render('index/new', {
             bug: bug,
@@ -38,6 +41,7 @@ router.get('/:id', async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id)
         res.render('index/details', { bug: bug })
+        //console.log(bug)
     } catch {
         res.redirect('/')
     }
@@ -48,6 +52,7 @@ router.get('/:id/edit', async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id)
         res.render('index/edit', { bug: bug })
+        //console.log(bug)
     } catch {
         res.redirect('/')
     }
@@ -58,8 +63,10 @@ router.put('/:id', async (req, res) => {
     let bug
     try {
         bug = await Bug.findById(req.params.id)
-        bug.name = req.body.name
+        bug.title = req.body.title
+        bug.description = req.body.description
         await bug.save()
+        // console.log(req.body.title)
         res.redirect(`/${bug.id}`)
     } catch {
         if (bug == null) {

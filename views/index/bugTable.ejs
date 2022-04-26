@@ -1,13 +1,15 @@
 <table id="bugTable" class="display" style="width:100%">
     <thead>
         <tr>
-            <th>Name</th>
+            <th>Title</th>
+            <th>Description</th>
         </tr>
     </thead>
     <tbody>
         <% bugs.forEach(bug => { %>
         <tr>
-            <td><a href="/<%= bug.id %>"><%= bug.name %></a></td>
+            <td><a href="/<%= bug.id %>"><%= bug.title %></a></td>
+            <td><%= bug.description %></a></td>
         </tr>
         <% }); %>
     </tbody>

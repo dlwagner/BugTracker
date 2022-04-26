@@ -1,4 +1,6 @@
-<h2><%= bug.name %></h2>
+<h2><%= bug.title %></h2>
+<p><%= bug.description %></p>
 <a href="/<%= bug.id %>/edit">Edit</a>
-<%- include('../partials/deleteBug',
-              { url: `/${bug.id}` }) %>
+<form method="POST" action="/<%= bug.id %>?_method=DELETE">
+    <button type="submit">Delete</button>
+</form>
