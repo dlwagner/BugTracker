@@ -1,4 +1,3 @@
-// Only use our environment variables if we're in development
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }

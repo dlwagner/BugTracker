@@ -1,13 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const Bug = require('../models/bug')
+const fs = require('fs');
+const fileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain', 'application/doc']
 
 //All bugs route
 router.get('/', async (req, res) => {
     try {
         const bugs = await Bug.find({})
         res.render('index/bugTable', { bugs: bugs })
-        //console.log(bugs)
     } catch {
         res.redirect('/')
     }
@@ -18,19 +19,21 @@ router.get('/new', (req, res) => {
     res.render('index/new', { bug: new Bug() })
 })
 
-//Create new bug route
+//Create bug route
 router.post('/', async (req, res) => {
     const bug = new Bug({
         title: req.body.title,
         description: req.body.description,
         category: req.body.category,
         status: req.body.status,
-        priority: req.body.priority
+        priority: req.body.priority,
     })
+
+    saveBugReport(bug, req.body.files)
+
     try {
         const newBug = await bug.save()
         res.redirect('/')
-        // console.log("save bug:", bug)
     } catch {
         res.render('index/new', {
             bug: bug,
@@ -44,9 +47,20 @@ router.get('/:id', async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id)
         res.render('index/details', { bug: bug })
-        //console.log(bug)
     } catch {
         res.redirect('/')
+    }
+})
+
+// Download route
+router.get('/:id/download', async (req, res) => {
+
+    try {
+        const bug = await Bug.findById(req.params.id)
+        downloadFile(bug)
+        res.redirect(`/${bug.id}`)
+    } catch {
+        console.log("error downloading file")
     }
 })
 
@@ -55,7 +69,6 @@ router.get('/:id/edit', async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id)
         res.render('index/edit', { bug: bug })
-        //console.log(bug)
     } catch {
         res.redirect('/')
     }
@@ -72,7 +85,6 @@ router.put('/:id', async (req, res) => {
         bug.status = req.body.status
         bug.priority = req.body.priority
         await bug.save()
-        // console.log(req.body.title)
         res.redirect(`/${bug.id}`)
     } catch {
         if (bug == null) {
@@ -102,5 +114,25 @@ router.delete('/:id', async (req, res) => {
     }
 })
 
+function saveBugReport(bug, fileEncoded) {
+    if (fileEncoded == null) return
+    const myFile = JSON.parse(fileEncoded)
+    if (myFile != null && fileTypes.includes(myFile.type)) {
+        bug.files = new Buffer.from(myFile.data, 'base64')
+        bug.fileName = myFile.name
+        bug.fileType = myFile.type
+    }
+}
+
+function downloadFile(bug) {
+
+    try {
+        let buf = Buffer.from(bug.files)
+        fs.writeFileSync(bug.fileName, buf)
+    } catch {
+        console.log('error writing file')
+    }
+
+}
 
 module.exports = router

@@ -1,10 +1,20 @@
-<h2>Bug Details</h2>
-<p>Title: <%= bug.title %></p>
-<p>Description: <%= bug.description %></p>
-<p>Category: <%= bug.category %></p>
-<p>Status: <%= bug.status %></p>
-<p>Priority: <%= bug.priority %></p>
-<a href="/<%= bug.id %>/edit">Edit</a>
-<form method="POST" action="/<%= bug.id %>?_method=DELETE">
-    <button type="submit">Delete</button>
-</form>
+<div class="container-sm mt-5">
+    <div class="row">
+        <div class="col-lg-3"></div>
+            <div class="col-lg-6">
+                <h2>Bug Details</h2>
+                <p>Title: <%= bug.title %></p>
+                <p>Description: <%= bug.description %></p>
+                <p>Category: <%= bug.category %></p>
+                <p>Status: <%= bug.status %></p>
+                <p>Priority: <%= bug.priority %></p>
+                <p>Supporting Documents: </p>
+                <a href="/<%= bug.id %>/download"><%= bug.fileName %></a>
+                <a href="/<%= bug.id %>/edit">Edit</a>
+                <form method="POST" action="/<%= bug.id %>?_method=DELETE">
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+        <div class="col-lg-3"></div>
+    </div>
+</div>

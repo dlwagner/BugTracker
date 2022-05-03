@@ -44,7 +44,23 @@ const bugSchema = new mongoose.Schema({
     milestone: {
         type: String,
         required: false
+    },
+
+    files: {
+        type: Buffer,
+        required: false
+    },
+
+    fileName: {
+        type: String,
+        required: false
+    },
+
+    fileType: {
+        type: String,
+        required: false
     }
+
 })
 
 module.exports = mongoose.model('Bug', bugSchema)
