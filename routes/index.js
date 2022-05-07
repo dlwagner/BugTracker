@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Bug = require('../models/bug')
-const fs = require('fs');
+const fs = require('fs').promises;
 const fileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain', 'application/doc']
 
 //All bugs route
@@ -47,20 +47,32 @@ router.get('/:id', async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id)
         res.render('index/details', { bug: bug })
-    } catch {
+    } catch (err) {
+        console.log(err)
         res.redirect('/')
     }
 })
 
-// Download route
+// Download file route
 router.get('/:id/download', async (req, res) => {
-
     try {
-        const bug = await Bug.findById(req.params.id)
-        downloadFile(bug)
-        res.redirect(`/${bug.id}`)
-    } catch {
-        console.log("error downloading file")
+        const bug = await Bug.findById(req.params.id);
+        let buf = Buffer.from(bug.files);
+        await fs.writeFile(bug.fileName, buf);
+
+        res.download(bug.fileName, err => {
+            if (err) {
+                throw err;
+            } else {
+                // If download is complete
+                if (res.headersSent) {
+                    // if you want to delete the file which was created locally after download is complete
+                    fs.rm(bug.fileName);
+                }
+            }
+        });
+    } catch (err) {
+        console.log("error downloading file", err);
     }
 })
 
@@ -121,18 +133,8 @@ function saveBugReport(bug, fileEncoded) {
         bug.files = new Buffer.from(myFile.data, 'base64')
         bug.fileName = myFile.name
         bug.fileType = myFile.type
+        bug.fileSize = myFile.size
     }
-}
-
-function downloadFile(bug) {
-
-    try {
-        let buf = Buffer.from(bug.files)
-        fs.writeFileSync(bug.fileName, buf)
-    } catch {
-        console.log('error writing file')
-    }
-
 }
 
 module.exports = router

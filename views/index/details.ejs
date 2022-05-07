@@ -10,10 +10,12 @@
                 <p>Priority: <%= bug.priority %></p>
                 <p>Supporting Documents: </p>
                 <a href="/<%= bug.id %>/download"><%= bug.fileName %></a>
+                <div>
                 <a href="/<%= bug.id %>/edit">Edit</a>
-                <form method="POST" action="/<%= bug.id %>?_method=DELETE">
+                <form class="mt-3" method="POST" action="/<%= bug.id %>?_method=DELETE">
                     <button type="submit">Delete</button>
                 </form>
+            </div>
             </div>
         <div class="col-lg-3"></div>
     </div>

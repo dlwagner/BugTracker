@@ -59,6 +59,11 @@ const bugSchema = new mongoose.Schema({
     fileType: {
         type: String,
         required: false
+    },
+
+    fileSize: {
+        type: Number,
+        required: false
     }
 
 })
