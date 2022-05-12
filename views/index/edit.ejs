@@ -13,16 +13,23 @@
             <textarea type="textarea" class="form-control" id="description" name="description"><%= bug.description %></textarea>
           </div>
           <!-- This doens't work. First file delete button just redirects to details page. Second file delete button 
-            goes to deletefile route.
+            goes to deletefile route. -->
           <div>
-            <% //for(var i=0; i<bug.bugFiles.length; i++) { %>
-              <a href="/<%= //bug.bugFiles[i]._id %>/download"><%= //bug.bugFiles[i].fileName %></a>
-              <form class="mt-3" method="POST" action="/<%= //bug.id %>/deletefile?_method=DELETE">
-                <button type="submit">Delete</button>
-              </form>
-            <% //} %>
+            <p>Mark for deletion</p>
           </div>
-          -->
+          <div>
+            <% for(var i=0; i<bug.bugFiles.length; i++) { %>
+              <!--<form class="mt-3" method="POST" action="/<%= //bug.id %>/deletefile?_method=DELETE"> -->
+                <a href="/<%= bug.bugFiles[i]._id %>/download"><%= bug.bugFiles[i].fileName %></a>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="checkDelete" name="checkDelete" value="<%= bug.bugFiles[i]._id %>" unchecked>
+                  <label class="form-check-label">Delete</label>
+                </div>
+                <!--<button type="submit">Delete</button>-->
+              <!--</form>-->
+            <% } %>
+          </div>
+          
           <div>
             <label for="files" class="form-label">Add Supporting Files</label>
             <input type="file" id="files" name="files" class="filepond form-control" multiple data-allow-reorder="true" data-max-file-size="15MB" data-max-files="3">

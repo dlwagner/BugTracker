@@ -61,6 +61,7 @@ router.get('/:id', async (req, res) => {
 
 //Edit bug route
 router.get('/:id/edit', async (req, res) => {
+    //console.log("In edit route")
     try {
         const bug = await Bug.findById(req.params.id).populate("bugFiles")
         res.render('index/edit', { bug: bug })
@@ -71,6 +72,7 @@ router.get('/:id/edit', async (req, res) => {
 
 // Download file route
 router.get('/:id/download', async (req, res) => {
+    console.log("begin download route")
     try {
         const bFile = await BugFile.findById(req.params.id);
         let buf = Buffer.from(bFile.fileData);
@@ -90,11 +92,16 @@ router.get('/:id/download', async (req, res) => {
     } catch (err) {
         console.log("error downloading file", err);
     }
+    console.log("end download route")
 })
 
 //Update Bug Route
 router.put('/:id', async (req, res) => {
+    console.log("begin update route")
     let bug
+
+
+
     try {
         bug = await Bug.findById(req.params.id)
         bug.title = req.body.title
@@ -104,6 +111,7 @@ router.put('/:id', async (req, res) => {
         bug.priority = req.body.priority
         await bug.save()
         res.redirect(`/${bug.id}`)
+        console.log("end update bug")
     } catch {
         if (bug == null) {
             res.redirect('/')
@@ -114,8 +122,22 @@ router.put('/:id', async (req, res) => {
             })
         }
     }
-    if (req.body.files.length > 0)
-        saveFiles(bug, req.body.files)
+
+    try {
+        if (req.body.checkDelete != null)
+            await deleteFiles(req.params.id, req.body.checkDelete)
+    } catch (err) {
+        console.log("error deleting files: ", err)
+    }
+
+    try {
+        if (req.body.files.length > 0)
+            await saveFiles(req.params.id, req.body.files)
+
+    } catch (err) {
+        console.log("error saving files: ", err)
+    }
+    console.log("end update route")
 })
 
 //Delete bug route
@@ -138,20 +160,45 @@ router.delete('/:id', async (req, res) => {
     }
 })
 
-//Delete File Route
-//TODO: finish this.
-router.delete('/:id/deletefile', async (req, res) => {
-    console.log('delete files')
-})
+async function deleteFiles(updateBug, files) {
+    console.log("updateBug: ", updateBug)
+    if (Array.isArray(files)) {
+        //More than one file is being deleted.
+        //The filepond objects are in an array.
+        for (let i = 0; i < files.length; i++) {
+            try {
+                // First, update the Bug.bugFiles array
+                await Bug.findOneAndUpdate({ _id: updateBug }, { $pull: { bugFiles: files[i] } })
+                // Then, delete the bug file
+                await BugFile.findOneAndDelete({ _id: files[i] })
+            } catch (err) {
+                console.log("err: ", err)
+            }
+        }
+    } else {
+        //Only one file is being deleted.
+        //The filepond object is not in an array.
+        try {
+            // First, update the Bug.bugFiles array
+            await Bug.findOneAndUpdate({ _id: updateBug }, { $pull: { bugFiles: files } })
+            // Then, delete the bug file
+            await BugFile.findOneAndDelete({ _id: files })
+        } catch (err) {
+            console.log("err: ", err)
+        }
+    }
+    console.log("end deleteFiles")
+}
 
 async function saveFiles(newBug, files) {
+    console.log("newBug; ", newBug)
     let fileData
     if (Array.isArray(files)) {
         //More than one file is being uploaded.
         //The filepond objects are in an array.
         for (let i = 0; i < files.length; i++) {
             fileData = JSON.parse(files[i])
-            console.log("ms: ", fileData.type)
+            console.log("Files is array: ")
             const bugFile = new BugFile({
                 bugId: newBug._id,
                 fileData: new Buffer.from(fileData.data, 'base64'),
@@ -160,15 +207,17 @@ async function saveFiles(newBug, files) {
                 fileSize: fileData.size
             })
             try {
+                console.log("newBug._id; ", newBug._id)
                 // First, Save the files
                 await bugFile.save()
                 // Then, Update bug report with file IDs
-                await Bug.findOneAndUpdate({ _id: newBug._id }, { $push: { bugFiles: bugFile._id } })
+                await Bug.findOneAndUpdate({ _id: newBug }, { $push: { bugFiles: bugFile._id } })
             } catch (err) {
                 console.log("err: ", err)
             }
         }
     } else {
+        console.log("Files is not array: ")
         //Only one file is being uploaded.
         //The filepond object is not in an array.
         fileData = JSON.parse(files)
@@ -180,14 +229,16 @@ async function saveFiles(newBug, files) {
             fileSize: fileData.size
         })
         try {
+            console.log("newBug._id; ", newBug._id)
             // First, Save the file
             await bugFile.save()
             // Then, Update bug report with file ID
-            await Bug.findOneAndUpdate({ _id: newBug._id }, { $push: { bugFiles: bugFile._id } })
+            await Bug.findOneAndUpdate({ _id: newBug }, { $push: { bugFiles: bugFile._id } })
         } catch (err) {
             console.log("err: ", err)
         }
     }
+    console.log("end saveFiles")
 }
 
 module.exports = router
