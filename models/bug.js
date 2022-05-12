@@ -46,25 +46,10 @@ const bugSchema = new mongoose.Schema({
         required: false
     },
 
-    files: {
-        type: Buffer,
-        required: false
-    },
-
-    fileName: {
-        type: String,
-        required: false
-    },
-
-    fileType: {
-        type: String,
-        required: false
-    },
-
-    fileSize: {
-        type: Number,
-        required: false
-    }
+    bugFiles: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'bugFile'
+    }]
 
 })
 
