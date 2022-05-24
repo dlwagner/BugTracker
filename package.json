@@ -21,7 +21,8 @@
     "method-override": "^3.0.0",
     "mongoose": "^6.3.0",
     "passport": "^0.5.3",
-    "passport-auth0": "^1.4.2"
+    "passport-auth0": "^1.4.2",
+    "dotenv": "^16.0.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",
