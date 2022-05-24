@@ -1,23 +1,15 @@
 <div class="container-fluid p-5 bg-primary text-white text-center">
     <nav>
-        <a class="text-white text-center" href="/">Bug Tracker</a>
+        <a class="text-white text-center" href="/allbugs">Bug Tracker</a>
         <ul>
             <a class="text-white text-center" href="/new">New Bug</a>
            <!-- <li> </li>-->
         </ul>
+        <% if (isAuthenticated) { %>
+            <form action="/logout" method="GET">
+                <button type="submit">Logout</button>
+            </form>
+        <% } %>
     </nav>
+    
 </div>
-
-
-
-
-
-
-    <!--<header>
-    <nav>
-        <a href="/">Bug Tracker Home</a>
-        <ul>
-            <li> <a href="/new">New Bug</a></li>
-        </ul>
-    </nav>
-</header>-->

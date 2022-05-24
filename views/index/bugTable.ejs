@@ -1,24 +1,24 @@
 <div class="container-sm mt-5">
-<table id="bugTable" class="display" style="width:100%">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Priority</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% bugs.forEach(bug => { %>
-        <tr>
-            <td><a href="/<%= bug.id %>"><%= bug.title %></a></td>
-            <td><%= bug.description %></td>
-            <td><%= bug.category %></td>
-            <td><%= bug.status %></td>
-            <td><%= bug.priority %></td>
-        </tr>
-        <% }); %>
-    </tbody>
-</table>
+    <table id="bugTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% bugs.forEach(bug => { %>
+            <tr>
+                <td><a href="/<%= bug.id %>"><%= bug.title %></a></td>
+                <td><%= bug.description %></td>
+                <td><%= bug.category %></td>
+                <td><%= bug.status %></td>
+                <td><%= bug.priority %></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </div>

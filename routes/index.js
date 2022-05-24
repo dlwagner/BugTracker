@@ -1,5 +1,13 @@
+// index.js
+
+/**
+ * Required External Modules
+ */
 const express = require('express')
 const router = express.Router()
+const passport = require("passport")
+const secured = require('../lib/middleware/secured')
+require("dotenv").config()
 const Bug = require('../models/bug')
 const BugFile = require('../models/bugFile')
 const fs = require('fs').promises;
@@ -7,20 +15,90 @@ const fileTypes = ['image/jpeg', 'image/png', 'image/gif',
     'application/pdf', 'text/plain', 'text/html', 'application/doc',
     'application/docx']
 
-let myArray = []
+/**
+ * Routes Definitions
+ */
 
-//All bugs route
+//Landing Page Route
 router.get('/', async (req, res) => {
+    console.log("in landingpage route")
+    console.log('req.isAuthenticated(): ', req.isAuthenticated())
+    try {
+        //const bugs = await Bug.find({})
+        //res.render('index/bugTable', { bugs: bugs })
+        res.render('index/landingPage')
+    } catch {
+        console.log("catch->all bugs route")
+        res.redirect('/')
+    }
+})
+
+router.get("/login", passport.authenticate("auth0", { scope: "openid email profile" }), (req, res) => {
+    console.log("in /login")
+    res.redirect("/");
+});
+
+router.get("/callback", (req, res, next) => {
+    passport.authenticate("auth0", (err, user, info) => {
+        console.log("in /callback")
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.redirect("/login");
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                return next(err);
+            }
+            const returnTo = req.session.returnTo;
+            delete req.session.returnTo;
+            res.redirect(returnTo || "/");
+        });
+    })(req, res, next);
+});
+
+router.get("/logout", (req, res) => {
+    req.logOut();
+    console.log("in /logout")
+    let returnTo = req.protocol + "://" + req.hostname;
+    const port = req.socket.localPort;
+
+    if (port !== undefined && port !== 80 && port !== 443) {
+        returnTo =
+            process.env.NODE_ENV === "production"
+                ? `${returnTo}/`
+                : `${returnTo}:${port}/`;
+    }
+
+    const logoutURL = new URL(
+        `https://${process.env.AUTH0_DOMAIN}/v2/logout`
+    );
+
+    const searchString = new URLSearchParams({
+        client_id: process.env.AUTH0_CLIENT_ID,
+        returnTo: returnTo
+    });
+
+    logoutURL.search = searchString;
+
+    res.redirect(logoutURL);
+});
+
+// All Bugs Route
+router.get('/allbugs', secured, async (req, res) => {
     try {
         const bugs = await Bug.find({})
         res.render('index/bugTable', { bugs: bugs })
+        //res.render('index/landingPage')
     } catch {
+        console.log("catch->all bugs route")
         res.redirect('/')
     }
 })
 
 //New bug route
-router.get('/new', (req, res) => {
+router.get('/new', secured, (req, res) => {
     res.render('index/new', { bug: new Bug() })
 })
 
@@ -36,32 +114,29 @@ router.post('/', async (req, res) => {
     })
     try {
         newBug = await bug.save()
-        res.redirect('/')
+        res.redirect('/allbugs')
     } catch {
         res.render('index/new', {
             bug: bug,
             errorMessage: 'Error creating bug report'
         })
     }
-    //console.log("msdoc: ", req.body.files)
     if (req.body.files.length > 0)
         saveFiles(newBug, req.body.files)
 })
 
 // Show bug route
-router.get('/:id', async (req, res) => {
+router.get('/:id', secured, async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id).populate("bugFiles")
         res.render('index/details', { bug: bug })
-    } catch (err) {
-        console.log(err)
+    } catch {
         res.redirect('/')
     }
 })
 
 //Edit bug route
-router.get('/:id/edit', async (req, res) => {
-    //console.log("In edit route")
+router.get('/:id/edit', secured, async (req, res) => {
     try {
         const bug = await Bug.findById(req.params.id).populate("bugFiles")
         res.render('index/edit', { bug: bug })
@@ -72,7 +147,6 @@ router.get('/:id/edit', async (req, res) => {
 
 // Download file route
 router.get('/:id/download', async (req, res) => {
-    console.log("begin download route")
     try {
         const bFile = await BugFile.findById(req.params.id);
         let buf = Buffer.from(bFile.fileData);
@@ -89,18 +163,14 @@ router.get('/:id/download', async (req, res) => {
                 }
             }
         });
-    } catch (err) {
-        console.log("error downloading file", err);
+    } catch {
+        //do error handling here
     }
-    console.log("end download route")
 })
 
 //Update Bug Route
 router.put('/:id', async (req, res) => {
-    console.log("begin update route")
     let bug
-
-
 
     try {
         bug = await Bug.findById(req.params.id)
@@ -111,7 +181,6 @@ router.put('/:id', async (req, res) => {
         bug.priority = req.body.priority
         await bug.save()
         res.redirect(`/${bug.id}`)
-        console.log("end update bug")
     } catch {
         if (bug == null) {
             res.redirect('/')
@@ -126,18 +195,17 @@ router.put('/:id', async (req, res) => {
     try {
         if (req.body.checkDelete != null)
             await deleteFiles(req.params.id, req.body.checkDelete)
-    } catch (err) {
-        console.log("error deleting files: ", err)
+    } catch {
+        //do error handling here
     }
 
     try {
         if (req.body.files.length > 0)
             await saveFiles(req.params.id, req.body.files)
 
-    } catch (err) {
-        console.log("error saving files: ", err)
+    } catch {
+        //do error handling here
     }
-    console.log("end update route")
 })
 
 //Delete bug route
@@ -149,19 +217,17 @@ router.delete('/:id', async (req, res) => {
         await BugFile.deleteMany({ bugId: bug._id })
         //Then delete the bug report
         await bug.deleteOne({ _id: bug._id })
-        res.redirect('/')
+        res.redirect('/allbugs')
     } catch {
         if (bug == null) {
             res.redirect('/')
         } else {
-            console.log("err")
             res.redirect(`/${bug.id}`)
         }
     }
 })
 
 async function deleteFiles(updateBug, files) {
-    console.log("updateBug: ", updateBug)
     if (Array.isArray(files)) {
         //More than one file is being deleted.
         //The filepond objects are in an array.
@@ -171,8 +237,8 @@ async function deleteFiles(updateBug, files) {
                 await Bug.findOneAndUpdate({ _id: updateBug }, { $pull: { bugFiles: files[i] } })
                 // Then, delete the bug file
                 await BugFile.findOneAndDelete({ _id: files[i] })
-            } catch (err) {
-                console.log("err: ", err)
+            } catch {
+                //do error handlilng here
             }
         }
     } else {
@@ -183,22 +249,19 @@ async function deleteFiles(updateBug, files) {
             await Bug.findOneAndUpdate({ _id: updateBug }, { $pull: { bugFiles: files } })
             // Then, delete the bug file
             await BugFile.findOneAndDelete({ _id: files })
-        } catch (err) {
-            console.log("err: ", err)
+        } catch {
+            //do error handling here
         }
     }
-    console.log("end deleteFiles")
 }
 
 async function saveFiles(newBug, files) {
-    console.log("newBug; ", newBug)
     let fileData
     if (Array.isArray(files)) {
         //More than one file is being uploaded.
         //The filepond objects are in an array.
         for (let i = 0; i < files.length; i++) {
             fileData = JSON.parse(files[i])
-            console.log("Files is array: ")
             const bugFile = new BugFile({
                 bugId: newBug._id,
                 fileData: new Buffer.from(fileData.data, 'base64'),
@@ -207,17 +270,15 @@ async function saveFiles(newBug, files) {
                 fileSize: fileData.size
             })
             try {
-                console.log("newBug._id; ", newBug._id)
                 // First, Save the files
                 await bugFile.save()
                 // Then, Update bug report with file IDs
                 await Bug.findOneAndUpdate({ _id: newBug }, { $push: { bugFiles: bugFile._id } })
-            } catch (err) {
-                console.log("err: ", err)
+            } catch {
+                //do error handling here
             }
         }
     } else {
-        console.log("Files is not array: ")
         //Only one file is being uploaded.
         //The filepond object is not in an array.
         fileData = JSON.parse(files)
@@ -229,16 +290,14 @@ async function saveFiles(newBug, files) {
             fileSize: fileData.size
         })
         try {
-            console.log("newBug._id; ", newBug._id)
             // First, Save the file
             await bugFile.save()
             // Then, Update bug report with file ID
             await Bug.findOneAndUpdate({ _id: newBug }, { $push: { bugFiles: bugFile._id } })
         } catch (err) {
-            console.log("err: ", err)
+            //do error handling here
         }
     }
-    console.log("end saveFiles")
 }
 
 module.exports = router

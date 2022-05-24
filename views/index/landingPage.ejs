@@ -1,0 +1,13 @@
+<h2>Landing Page</h2>
+<div>
+    <% if (isAuthenticated) { %>
+        <form action="/allbugs" method="GET">
+            <button type="submit">All Bugs</button>
+        </form>
+    <%} else { %>
+        <form action="/login" method="GET">
+            <!--<a href="/allbugs">login</a>-->
+            <button type="submit">Login</button>
+        </form>
+    <% } %>
+</div>
